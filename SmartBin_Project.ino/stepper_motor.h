@@ -1,10 +1,10 @@
 #ifndef STEPPER_MOTOR_H
 #define STEPPER_MOTOR_H
 
-#define STEPPER_IN1 8
-#define STEPPER_IN2 9
-#define STEPPER_IN3 10
-#define STEPPER_IN4 11
+#define STEPPER_IN1 11
+#define STEPPER_IN2 10
+#define STEPPER_IN3 9
+#define STEPPER_IN4 8
 
 void Stepper_init();
 void Stepper_step(int step); // single step relative: positive = forward steps, negative = back

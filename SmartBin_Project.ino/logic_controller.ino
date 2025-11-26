@@ -8,6 +8,7 @@
 #include "buzzer.h"
 #include "leds.h"
 #include "sim800l.h"
+#include "lcd.h"
 #include <Arduino.h>
 
 // --- Phone number ---
@@ -50,7 +51,7 @@ void System_init() {
 
   // indicate ready
   LED_allBlinkOnce();
-  Buzzer_beep(1, 300);
+  //Buzzer_beep(1, 300);
 
   Serial.println(F("[SmartBin] Initialization Complete ✅"));
 }
@@ -88,8 +89,15 @@ void System_mainLoop() {
   Serial.println(F("────────────────────────────"));
   Serial.print(F("[Monitor] Ultrasonic Distance (cm): "));
   Serial.println(Ultrasonic_readCM());
+
+  // Rain sensor readings
+  int rainRaw = RainSensor_readAnalog();
+  Serial.print(F("[Monitor] Rain Sensor RAW: "));
+  Serial.println(rainRaw);
   Serial.print(F("[Monitor] Rain Sensor: "));
   Serial.println(isWet ? F("WET") : F("DRY"));
+
+
   Serial.print(F("[Monitor] IR Object: "));
   Serial.println(IR_detectObject() ? F("OBJECT DETECTED") : F("NO OBJECT"));
   Serial.print(F("[Monitor] Metal: "));
@@ -109,6 +117,23 @@ void System_mainLoop() {
   delay(300);
 
   Serial.println(F("────────────────────────────\n"));
+
+    // LCD update
+  const char *detectedLabel = 
+      isMetal ? "METAL" : (isWet ? "WET" : "DRY");
+
+  LCD_updateStatus(
+    binFull[BIN_WET],
+    binFull[BIN_DRY],
+    binFull[BIN_METAL],
+    binDepth[BIN_WET],
+    binDepth[BIN_DRY],
+    binDepth[BIN_METAL],
+    detectedLabel,
+    analogRead(A0),           // rain raw value
+    Ultrasonic_readCM()       // live ultrasonic value
+  );
+
   delay(300);
 }
 
@@ -122,21 +147,21 @@ void System_checkFullBins() {
   delay(200);
   float d0 = Ultrasonic_readCM();
   if (d0 < 999.0) binDepth[BIN_WET] = d0;
-  Buzzer_beep(1, 300);
+  //Buzzer_beep(1, 300);
 
   // rotate +120° -> dry
   Stepper_toPosition(1);
   delay(200);
   float d1 = Ultrasonic_readCM();
   if (d1 < 999.0) binDepth[BIN_DRY] = d1;
-  Buzzer_beep(1, 300);
+  //Buzzer_beep(1, 300);
 
   // rotate +120° -> metal (240°)
   Stepper_toPosition(2);
   delay(200);
   float d2 = Ultrasonic_readCM();
   if (d2 < 999.0) binDepth[BIN_METAL] = d2;
-  Buzzer_beep(1, 300);
+  //Buzzer_beep(1, 300);
 
   // return to 0° home
   Stepper_toPosition(0);
@@ -166,7 +191,7 @@ void System_checkFullBins() {
 
   // flash LEDs & beep once to indicate completion
   LED_allBlinkOnce();
-  Buzzer_beep(1, 300);
+  //Buzzer_beep(1, 300);
 
     // Print bin status
   Serial.println(F("------ Bin Status ------"));
@@ -188,7 +213,7 @@ void handleGarbageType(int type) {
   // If full: beep pattern and blink logic until IR says no object (per your spec)
   if (binFull[type]) {
     // three beeps once and then blink/beep repeatedly until IR detects no object
-    Buzzer_beep(3, 300);      // 3 beeps once
+    //Buzzer_beep(3, 300);      // 3 beeps once
     // LED off for that type (spec said LED off)
     LED_off(type + 1);
 
@@ -200,7 +225,7 @@ void handleGarbageType(int type) {
       // blink three times with beeps
       for (int b=0; b<3; b++) {
         LED_blink(type + 1, 1); // 1 blink = on 300ms off 300ms
-        Buzzer_beep(1, 300);
+        //Buzzer_beep(1, 300);
         delay(300); // spacing between blink/beep per your spec
       }
 
@@ -238,6 +263,8 @@ void handleGarbageType(int type) {
   // After rotation, check IR inside divider bin for object presence
   if (IR_detectObject()) {
 
+    Buzzer_beep(1, 300);  // 1 beep of 300ms; you can adjust
+
       // rotate stepper to the correct position:
   switch (type) {
     case BIN_WET: Stepper_toPosition(0); break;   // wet = 0°
@@ -273,7 +300,7 @@ void handleGarbageType(int type) {
   } else {
     // No object detected in divider when expected: beep pattern 2 beeps 3 times with 500ms between pairs
     for (int r = 0; r < 3; r++) {
-      Buzzer_beep(2, 300);
+      //Buzzer_beep(2, 300);
       delay(500);
     }
     // Keep LED off for this type and return to metal detection

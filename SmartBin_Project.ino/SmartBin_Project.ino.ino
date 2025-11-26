@@ -11,10 +11,12 @@
 #include "leds.h"
 #include "logic_controller.h"
 #include "sim800l.h"
+#include "lcd.h"
 
 void setup() {
   Serial.begin(9600);
 
+  LCD_init();
   Ultrasonic_init();
   RainSensor_init();
   Inductive_init();

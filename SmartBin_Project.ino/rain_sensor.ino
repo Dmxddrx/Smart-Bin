@@ -1,20 +1,22 @@
 #include "rain_sensor.h"
-#include <Arduino.h>
-
-//#define RAIN_WET_THRESHOLD 200  // tune this value; > threshold => wet (example)
 
 // Initialize sensor pins
 void RainSensor_init() {
-  pinMode(RAIN_DIGITAL_PIN, INPUT); // analog pin needs no pinMode
+    pinMode(RAIN_DIGITAL_PIN, INPUT);
 }
 
-// Read analog value from sensor
+// Read analog value (0–1023)
 int RainSensor_readAnalog() {
-  return analogRead(RAIN_ANALOG_PIN);
+    return analogRead(RAIN_ANALOG_PIN);
 }
 
-// Determine if wet based on threshold
+// Read digital pin (optional)
+bool RainSensor_readDigital() {
+    return digitalRead(RAIN_DIGITAL_PIN);   // HIGH or LOW
+}
+
+// Determine wet/dry condition using analog value
 bool RainSensor_isWet() {
-  int val = RainSensor_readAnalog();
-  return val <= RAIN_WET_THRESHOLD; // <= threshold = wet
+    int val = RainSensor_readAnalog();
+    return (val <= RAIN_WET_THRESHOLD);
 }
