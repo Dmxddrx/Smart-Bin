@@ -1,7 +1,7 @@
 #include "lcd.h"
 #include <LiquidCrystal_I2C.h>
 
-LiquidCrystal_I2C lcd(0x27, 16, 4);  // Most common I2C LCD address
+LiquidCrystal_I2C lcd(0x27, 16, 4);  // I2C LCD address
 
 void LCD_init() {
   lcd.init();

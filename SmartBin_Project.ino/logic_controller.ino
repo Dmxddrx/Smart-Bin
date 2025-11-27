@@ -19,9 +19,9 @@ const char PHONE_NUMBER[] = "+94717418097";
 #define BIN_DRY   1
 #define BIN_METAL 2
 
-// Depth thresholds (cm) from your spec:
-#define BIN_EMPTY_DISTANCE 12   // empty when ~11cm
-#define BIN_FULL_DISTANCE 10     // full when < 6cm
+// Depth thresholds (cm)
+#define BIN_EMPTY_DISTANCE 12   // empty when ~12cm
+#define BIN_FULL_DISTANCE 10     // full when < 10cm
 
 static float binDepth[3];
 static bool binFull[3];
@@ -31,7 +31,7 @@ void System_checkFullBins();
 void handleGarbageType(int type);
 
 void System_init() {
-  Serial.begin(9600); // Removed: Already called in main sketch setup()
+  Serial.begin(9600);
   Serial.println(F("\n[SmartBin] System Initializing..."));
 
   // initialize bin depths default (assume empty)
@@ -220,7 +220,7 @@ void handleGarbageType(int type) {
   // After rotation, check IR inside divider bin for object presence
   if (IR_detectObject()) {
 
-    Buzzer_beep(1, 300);  // 1 beep of 300ms; you can adjust
+  Buzzer_beep(1, 300);  // 1 beep of 300ms; you can adjust
 
       // rotate stepper to the correct position:
   switch (type) {

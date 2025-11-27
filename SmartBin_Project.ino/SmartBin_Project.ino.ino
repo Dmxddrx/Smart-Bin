@@ -16,20 +16,20 @@
 void setup() {
   Serial.begin(9600);
 
-  LCD_init();
-  Ultrasonic_init();
-  RainSensor_init();
-  Inductive_init();
-  IR_init();
-  Servo_init();
-  Stepper_init();
-  Buzzer_init();
-  LED_init();
+  LCD_init(); // initialize LCD Display
+  Ultrasonic_init(); // initialize ultrasonic
+  RainSensor_init(); // initialize rain sensor
+  Inductive_init(); // initialize Metal detector
+  IR_init(); // initialize IR
+  Servo_init(); // initialize Servo motor
+  Stepper_init(); // initialize Stepper motor
+  Buzzer_init(); // initialize Buzzer
+  LED_init(); // initialize LEDs
   SIM800L_init(); // initialize GSM module
 
   System_init(); // initialize logic controller state
 }
 
 void loop() {
-  System_mainLoop(); // main behaviour (blocking style per your spec)
+  System_mainLoop();
 }

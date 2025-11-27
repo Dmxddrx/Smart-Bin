@@ -8,8 +8,7 @@
 #define RAIN_DIGITAL_PIN  4
 
 // Threshold for wet/dry detection
-// NOTE: You can tune this after reading raw values
-#define RAIN_WET_THRESHOLD  900   // <= threshold → wet, > threshold → dry
+#define RAIN_WET_THRESHOLD  900   // 900 <= threshold → wet, > threshold → dry
 
 void RainSensor_init();
 int  RainSensor_readAnalog();      // returns 0–1023
