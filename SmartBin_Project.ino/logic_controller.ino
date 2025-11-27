@@ -12,7 +12,7 @@
 #include <Arduino.h>
 
 // --- Phone number ---
-const char PHONE_NUMBER[] = "+94717418097"; // your phone number
+const char PHONE_NUMBER[] = "+94717418097"; 
 
 // bin indexes
 #define BIN_WET   0
@@ -25,24 +25,19 @@ const char PHONE_NUMBER[] = "+94717418097"; // your phone number
 
 static float binDepth[3];
 static bool binFull[3];
-//static bool binWasFull[3]; // NEW: Tracks the state of the previous loop iteration
 
 // 🔹 Forward declare 
 void System_checkFullBins();
 void handleGarbageType(int type);
-//void sendBinFullSMS(int type);
 
 void System_init() {
   Serial.begin(9600); // Removed: Already called in main sketch setup()
   Serial.println(F("\n[SmartBin] System Initializing..."));
 
-  //SIM800L_init(); // Removed: Already called in main sketch setup()
-
   // initialize bin depths default (assume empty)
   for (int i = 0; i < 3; i++) {
     binDepth[i] = BIN_EMPTY_DISTANCE;
     binFull[i] = false;
-    //binWasFull[i] = false; // Initialize previous state tracker
   }
 
   // initial full-check
@@ -57,10 +52,6 @@ void System_init() {
 }
 
 void System_mainLoop() {
-  // Continuously monitor: This high-level loop follows your described flow:
-  // 1. Always check metal detection first.
-  // 2. If metal -> handle metal flow; else check wet/dry and handle.
-  // 3. Each handle returns to begin.
 
 // Step 1: Metal check
   bool isMetal = Inductive_isMetal();
@@ -83,8 +74,6 @@ void System_mainLoop() {
 
   // NOTE: Fullness check must be done periodically. We can call it here 
   // after the garbage drop cycle to ensure state is up-to-date.
-  //System_checkFullBins();
-
   // Debug print for continuous monitoring
   Serial.println(F("────────────────────────────"));
   Serial.print(F("[Monitor] Ultrasonic Distance (cm): "));
@@ -137,10 +126,7 @@ void System_mainLoop() {
   delay(300);
 }
 
-/////////////////////////
 // Helper functions
-/////////////////////////
-
 void System_checkFullBins() {
   // Start at 0° (wet bin)
   Stepper_toPosition(0);
@@ -171,23 +157,8 @@ void System_checkFullBins() {
     binFull[i] = (binDepth[i] < BIN_FULL_DISTANCE);
       if (binFull[i]) {
         sendBinFullSMS(i);
-      
-      //binWasFull[i] = binFull[i]; // update previous state
       }
   }
-
-
-  // Evaluate fullness + send SMS if just became full
-//  for (int i = 0; i < 3; i++) {
-   // bool wasFull = binWasFull[i];
-   // binFull[i] = (binDepth[i] < BIN_FULL_DISTANCE);
-
-   // if (!wasFull && binFull[i]) {
-    //  sendBinFullSMS(i);
-    //}
-    //binWasFull[i] = binFull[i];
-  //}
-
 
   // flash LEDs & beep once to indicate completion
   LED_allBlinkOnce();
@@ -202,8 +173,6 @@ void System_checkFullBins() {
   Serial.print(F("Metal bin: "));
   Serial.println(binFull[BIN_METAL] ? "FULL" : "EMPTY"); // no F() here
   Serial.println(F("------------------------"));
-
-
 }
 
 // Forward declaration for handler used in loop
@@ -212,14 +181,10 @@ void handleGarbageType(int type);
 void handleGarbageType(int type) {
   // If full: beep pattern and blink logic until IR says no object (per your spec)
   if (binFull[type]) {
-    // three beeps once and then blink/beep repeatedly until IR detects no object
+
     //Buzzer_beep(3, 300);      // 3 beeps once
-    // LED off for that type (spec said LED off)
     LED_off(type + 1);
 
-    // Blink 3 times with beeps until IR HW201 check for object and tell no object
-    // Interpretation: Wait while the divider still has an object (IR inside divider says object present),
-    // once divider is empty (no object), return to metal detection.
     int attempts = 0;
     while (true) {
       // blink three times with beeps
@@ -251,14 +216,6 @@ void handleGarbageType(int type) {
   // Not full: proceed to drop
   // LED for detected type lights up until told off (per spec)
   LED_on(type + 1);
-
-  // rotate stepper to the correct position:
-  //switch (type) {
-    //case BIN_WET: Stepper_toPosition(0); break;   // wet = 0°
-    //case BIN_DRY: Stepper_toPosition(1); break;   // dry = +120°
-    //case BIN_METAL: Stepper_toPosition(2); break; // metal = +240°
-  //}
-  //delay(500);
 
   // After rotation, check IR inside divider bin for object presence
   if (IR_detectObject()) {
@@ -311,9 +268,9 @@ void handleGarbageType(int type) {
   }
 }
 
-/////////////////////////
+
 // Send SMS
-/////////////////////////
+
 void sendBinFullSMS(int type) {
   const char *binName;
   switch (type) {
